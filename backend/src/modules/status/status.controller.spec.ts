@@ -21,12 +21,11 @@ describe('Status Controller', () => {
     controller = module.get<StatusController>(StatusController);
   });
   it('should return ok status', async () => {
-    // const status = await controller.status();
-    // expect(status).toEqual({
-    //   status: 'ok',
-    //   version: 'test',
-    //   environment: 'testing',
-    // });
-      expect(1).toEqual(1)
+    const status = await controller.status();
+    expect(status).toEqual({
+      status: 'ok',
+      version: 'test',
+      environment: 'testing',
+    });
   });
 });
