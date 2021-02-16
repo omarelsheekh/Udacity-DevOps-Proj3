@@ -47,7 +47,7 @@ jobs:
             npm build
       - save_cache:
           paths: [frontend/node_modules]
-          key: frontend-build
+          key: frontend-build-{{ .Environment.CIRCLE_WORKFLOW_ID }}
 
   build-backend:
     docker:
@@ -62,7 +62,7 @@ jobs:
             npm audit fix --audit-level=critical --force
       - save_cache:
           paths: [backend/node_modules]
-          key: backend-build
+          key: backend-build-{{ .Environment.CIRCLE_WORKFLOW_ID }}
 
   test-frontend:
     docker:
@@ -70,7 +70,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [frontend-build]
+          keys: ["frontend-build-{{ .Environment.CIRCLE_WORKFLOW_ID }}"]
       - run:
           name: test front-end
           working_directory: frontend/
@@ -84,7 +84,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [backend-build]
+          keys: ["backend-build-{{ .Environment.CIRCLE_WORKFLOW_ID }}"]
       - run:
           name: Back-end test
           working_directory: backend/
