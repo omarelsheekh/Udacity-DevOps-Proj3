@@ -75,6 +75,7 @@ jobs:
           name: test front-end
           working_directory: frontend/
           command: |
+            npm install oauth-sign
             npm run test
                     
   test-backend:
