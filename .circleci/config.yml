@@ -4,14 +4,17 @@ commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
-      # Add parameter here   
+      stacks-ID:
+        type: string
     steps:
       - run:
           name: Destroy environments
           when: on_fail
           command: |
-            # Your code here
-            exit 1
+            aws cloudformation delete-stack \
+              --stack-name backend-<< parameters.stacks-ID >>
+            aws cloudformation delete-stack \
+              --stack-name frontend-<< parameters.stacks-ID >>
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
@@ -126,64 +129,61 @@ jobs:
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
-              #--tags project=your-tag \
-              # --stack-name "your back-end stack name with workflow id" \
-              # --parameter-overrides ID="your workflow id"  
-              exit 1
+              --stack-name "backend-stack-$CIRCLE_WORKFLOW_ID" \
+              --parameter-overrides ID=backend-$CIRCLE_WORKFLOW_ID  
       - run:
           name: Ensure front-end infrastructure exist
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
-              #--tags project=your-tag \
-              # --stack-name "your front-end stack name with workflow id" \
-              # --parameter-overrides ID="your workflow id"  
-              exit 1
+              --stack-name "frontend-stack-$CIRCLE_WORKFLOW_ID" \
+              --parameter-overrides ID=frontend-$CIRCLE_WORKFLOW_ID
       - run:
           name: Add back-end ip to ansible inventory
           command: |
-            # Your code here
-            exit 1
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - project/.circleci/ansible/inventory.txt
-      # Here's where you will add some code to rollback on failure      
+            aws ec2 describe-instances \
+              --filters "Name=tag:Name,Values=backend-$CIRCLE_WORKFLOW_ID" \
+              --query 'Reservations[*].Instances[*].PublicDnsName' \
+              --output text >> .circleci/ansible/inventory.txt
+      - save_cache:
+          paths: [".circleci/ansible/inventory.txt"]
+          key: inventory-{{ .Environment.CIRCLE_WORKFLOW_ID }}
+      - destroy-environment:
+          stacks-ID: $CIRCLE_WORKFLOW_ID
 
   configure-infrastructure:
     docker:
       - image: cytopia/ansible
     steps:
       - checkout
-      # Add ssh keys with fingerprint
-      # attach workspace
-      - run:
-          name: Install dependencies
-          command: |
-            # Your code here
-            exit 1
+      - add_ssh_keys:
+          fingerprints: 
+            - "8c:12:f9:c8:21:1d:5e:82:5e:bc:ad:bf:2f:3c:98:b1"
+      - restore_cache:
+          keys: ["inventory-{{ .Environment.CIRCLE_WORKFLOW_ID }}"]
       - run:
           name: Configure server
+          working_directory: .circlecli/ansible
           command: |
-            # Your code here
-            exit 1
-      # Here's where you will add some code to rollback on failure      
+            ansible-playbook -i inventory.txt main.yml
+      - destroy-environment:
+          stacks-ID: $CIRCLE_WORKFLOW_ID      
 
   run-migrations:
     docker:
       - image: circleci/node:13.8.0
     steps:
       - checkout
+      - restore_cache:
+          keys: ["frontend-build-{{ .Environment.CIRCLE_WORKFLOW_ID }}"]
       - run:
           name: Run migrations
-          command: |
-            # Your code here
-            exit 1
+          command: npm run migrations
       - run:
           name: Send migration results to memstash
           command: |
             # Your code here
-            exit 1
+            exit 0
      # Here's where you will add some code to rollback on failure      
 
   deploy-frontend:
@@ -299,7 +299,7 @@ workflows:
           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
           filters:
             branches:
-              only: [test-feature-branch]
+              only: [test-feature-branch, main]
       - configure-infrastructure:
           requires: [deploy-infrastructure]
       - run-migrations:
