@@ -43,7 +43,7 @@ jobs:
           working_directory: frontend/
           command: |
             npm install
-            npm audit fix --force
+            npm audit fix --audit-level=critical --force
             npm build
       - save_cache:
           paths: [frontend/node_modules]
@@ -59,7 +59,7 @@ jobs:
           working_directory: backend/
           command: |
             npm install
-            npm audit fix --force
+            npm audit fix --audit-level=critical --force
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build-{{ .Environment.CIRCLE_WORKFLOW_ID }}
