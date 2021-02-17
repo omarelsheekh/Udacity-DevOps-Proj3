@@ -158,6 +158,8 @@ jobs:
   configure-infrastructure:
     docker:
       - image: python
+    environment:
+      ANSIBLE_HOST_KEY_CHECKING: False
     steps:
       - checkout
       - add_ssh_keys:
