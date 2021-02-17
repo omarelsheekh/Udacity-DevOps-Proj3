@@ -17,7 +17,7 @@
   register: nodereg
 
 - name: installing dependencies
-  command: |
+  shell: |
     cd /home/
     git clone https://github.com/omarelsheekh/Udacity-DevOps-Proj3
     cd Udacity-DevOps-Proj3/backend/
