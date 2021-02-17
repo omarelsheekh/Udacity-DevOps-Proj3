@@ -173,16 +173,15 @@ jobs:
           name: Configure server
           working_directory: .circleci/ansible/
           command: |
-            cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml -e " \
             ENVIRONMENT=production \
             TYPEORM_CONNECTION=postgres \
             TYPEORM_ENTITIES="./src/modules/domain/**/*.entity.ts " \
-            TYPEORM_HOST=$(TYPEORM_HOST) \
-            TYPEORM_PORT=$(TYPEORM_PORT) \
-            TYPEORM_USERNAME=$(TYPEORM_USERNAME) \
-            TYPEORM_PASSWORD=$(TYPEORM_PASSWORD) \
-            TYPEORM_DATABASE=$(TYPEORM_DATABASE) \
+            TYPEORM_HOST="$TYPEORM_HOST" \
+            TYPEORM_PORT="$TYPEORM_PORT" \
+            TYPEORM_USERNAME="$TYPEORM_USERNAME" \
+            TYPEORM_PASSWORD="$TYPEORM_PASSWORD" \
+            TYPEORM_DATABASE="$TYPEORM_DATABASE" \
             "
       - destroy-environment:
           stacks-ID: $CIRCLE_WORKFLOW_ID    
@@ -315,7 +314,6 @@ workflows:
           requires: [build-frontend]
       - deploy-infrastructure:
           # requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-          requires: [build-frontend, build-backend]
           filters:
             branches:
               only: [test-feature-branch, main]
