@@ -8,13 +8,17 @@ commands:
         type: string
     steps:
       - run:
-          name: Destroy environments
+          name: Destroy backend
           when: on_fail
           command: |
             aws cloudformation delete-stack \
-              --stack-name backend-<< parameters.stacks-ID >>
+              --stack-name backend-stack-<< parameters.stacks-ID >>
+      - run:
+          name: Destroy frontend
+          when: on_fail
+          command: |
             aws cloudformation delete-stack \
-              --stack-name frontend-<< parameters.stacks-ID >>
+              --stack-name frontend-stack-<< parameters.stacks-ID >>
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
@@ -174,11 +178,11 @@ jobs:
             ENVIRONMENT=production \
             TYPEORM_CONNECTION=postgres \
             TYPEORM_ENTITIES="./src/modules/domain/**/*.entity.ts " \
-            TYPEORM_HOST=$TYPEORM_HOST \
-            TYPEORM_PORT=$TYPEORM_PORT \
-            TYPEORM_USERNAME=$TYPEORM_USERNAME \
-            TYPEORM_PASSWORD=$TYPEORM_PASSWORD \
-            TYPEORM_DATABASE=$TYPEORM_DATABASE \
+            TYPEORM_HOST=$(TYPEORM_HOST) \
+            TYPEORM_PORT=$(TYPEORM_PORT) \
+            TYPEORM_USERNAME=$(TYPEORM_USERNAME) \
+            TYPEORM_PASSWORD=$(TYPEORM_PASSWORD) \
+            TYPEORM_DATABASE=$(TYPEORM_DATABASE) \
             "
       - destroy-environment:
           stacks-ID: $CIRCLE_WORKFLOW_ID    
