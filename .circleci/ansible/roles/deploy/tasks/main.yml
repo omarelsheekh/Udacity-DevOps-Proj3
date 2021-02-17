@@ -6,35 +6,25 @@
     state: latest
     update_cache: yes
 
+- name: clone repos
+  command: "chdir=/home/ {{ item }}"
+  with_items:
+    - git clone https://github.com/omarelsheekh/Udacity-DevOps-Proj3
+    - curl -sL https://deb.nodesource.com/setup_13.x -o nodesource_setup.sh
+  
+
 - name: install node
-  command: |
-    git clone https://github.com/joyent/node.git 
-    cd node
-    git checkout v0.10.24
-    ./configure
-    make
-    sudo make install
-  register: nodereg
+  apt:
+    name: nodejs
+    state: latest
 
-- name: installing dependencies
-  shell: |
-    cd /home/
-    git clone https://github.com/omarelsheekh/Udacity-DevOps-Proj3
-    cd Udacity-DevOps-Proj3/backend/
-    npm install
-
-- name: "install pm2"
-  become: true
-  npm:
-    name: pm2
-    global: yes
-    production: yes
-    state: present
-
-- name: Start PM2
-  shell: |
-    cd /home/Udacity-DevOps-Proj3/backend/
-    pm2 start npm --name backend -- start
+- name: installing dependencies and run the app
+  command: "chdir=/home/Udacity-DevOps-Proj3/backend/ {{ item }}"
+  with_items:
+    - npm install
+    - npm run start
+    - npm install pm2 -g
+    - pm2 start npm --name backend -- start
   register: runreg
 
 - name: print nodereg
