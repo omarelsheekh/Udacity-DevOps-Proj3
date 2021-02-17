@@ -1,2 +1,46 @@
 ---
 
+- name: install packages
+  apt:
+    name: [git, build-essential, curl, openssl, libssl-dev]
+    state: latest
+    update_cache: yes
+
+- name: install node
+  command: |
+    git clone https://github.com/joyent/node.git 
+    cd node
+    git checkout v0.10.24
+    ./configure
+    make
+    sudo make install
+  register: node-reg
+
+- name: installing dependencies
+  command: |
+    cd /home/
+    git clone https://github.com/omarelsheekh/Udacity-DevOps-Proj3
+    cd Udacity-DevOps-Proj3/backend/
+    npm install
+
+- name: "install pm2"
+  become: true
+  npm:
+    name: pm2
+    global: yes
+    production: yes
+    state: present
+
+- name: Start PM2
+  shell: |
+    cd /home/Udacity-DevOps-Proj3/backend/
+    pm2 start npm --name backend -- start
+  register: run-reg
+
+- name: print node-reg
+  debug:
+    var: node-reg.stdout_lines
+
+- name: print run-reg
+  debug:
+    var: run-reg.stdout_lines
