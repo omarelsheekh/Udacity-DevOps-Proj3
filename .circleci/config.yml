@@ -149,7 +149,6 @@ jobs:
               --filters "Name=tag:Name,Values=backend-$CIRCLE_WORKFLOW_ID" \
               --query 'Reservations[*].Instances[*].PublicDnsName' \
               --output text >> .circleci/ansible/inventory.txt
-            cat .circleci/ansible/inventory.txt
       - save_cache:
           paths: [".circleci/ansible/inventory.txt"]
           key: inventory-{{ .Environment.CIRCLE_WORKFLOW_ID }}
@@ -173,16 +172,7 @@ jobs:
           name: Configure server
           working_directory: .circleci/ansible/
           command: |
-            ansible-playbook -i inventory.txt deploy-backend.yml -e " \
-            ENVIRONMENT=production \
-            TYPEORM_CONNECTION=postgres \
-            TYPEORM_ENTITIES="./src/modules/domain/**/*.entity.ts " \
-            TYPEORM_HOST="$TYPEORM_HOST" \
-            TYPEORM_PORT="$TYPEORM_PORT" \
-            TYPEORM_USERNAME="$TYPEORM_USERNAME" \
-            TYPEORM_PASSWORD="$TYPEORM_PASSWORD" \
-            TYPEORM_DATABASE="$TYPEORM_DATABASE" \
-            "
+            ansible-playbook -i inventory.txt deploy-backend.yml 
       - destroy-environment:
           stacks-ID: $CIRCLE_WORKFLOW_ID    
 
