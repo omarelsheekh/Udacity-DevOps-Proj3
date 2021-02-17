@@ -14,7 +14,7 @@
     ./configure
     make
     sudo make install
-  register: node-reg
+  register: nodereg
 
 - name: installing dependencies
   command: |
@@ -35,12 +35,12 @@
   shell: |
     cd /home/Udacity-DevOps-Proj3/backend/
     pm2 start npm --name backend -- start
-  register: run-reg
+  register: runreg
 
-- name: print node-reg
+- name: print nodereg
   debug:
-    var: node-reg.stdout_lines
+    var: nodereg.stdout_lines
 
-- name: print run-reg
+- name: print runreg
   debug:
-    var: run-reg.stdout_lines
+    var: runreg.stdout_lines
