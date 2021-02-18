@@ -1,2 +1,1 @@
 [web]
-ec2-35-163-107-4.us-west-2.compute.amazonaws.com
