@@ -30,10 +30,10 @@
 # - name: migrate the db
 #   shell: "chdir=/home/ubuntu/Udacity-DevOps-Proj3/backend/ npm run migrations"
 
-- name: run the app
-  shell: "chdir=/home/ubuntu/Udacity-DevOps-Proj3/backend/ npm run start"
-  async: 9999999999
-  poll: 0
+# - name: run the app
+#   shell: "chdir=/home/ubuntu/Udacity-DevOps-Proj3/backend/ npm run start"
+#   async: 9999999999
+#   poll: 0
 
 - name: run pm2
-  shell: "chdir=/home/ubuntu/Udacity-DevOps-Proj3/backend/ pm2 start npm --name backend -- start"
+  shell: chdir=/home/ubuntu/Udacity-DevOps-Proj3/backend/ pm2 start "npm run start"
