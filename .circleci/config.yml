@@ -227,7 +227,15 @@ jobs:
           command: |
             echo $API_URL
             npm run build
-            aws s3 sync ./dist/* s3://udapeople-${CIRCLE_WORKFLOW_ID}
+            export s3Dir=s3://udapeople-${CIRCLE_WORKFLOW_ID}
+            for entry in dist/*; do
+                name=`echo $entry | sed 's/.*\///'`  # getting the name of the file or directory
+                if [[ -d  $entry ]]; then  # if it is a directory
+                    aws s3 cp  --recursive "$name" "$s3Dir/$name/"
+                else  # if it is a file
+                    aws s3 cp "$name" "$s3Dir/"
+                fi
+            done
       - destroy-environment:
           stacks-ID: $CIRCLE_WORKFLOW_ID        
                     
