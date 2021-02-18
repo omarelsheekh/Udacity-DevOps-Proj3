@@ -50,7 +50,6 @@ jobs:
           working_directory: frontend/
           command: |
             npm install
-            npm build
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build-{{ .Environment.CIRCLE_WORKFLOW_ID }}
@@ -220,7 +219,7 @@ jobs:
               --filters "Name=tag:Name,Values=backend-$CIRCLE_WORKFLOW_ID" \
               --query 'Reservations[*].Instances[*].PublicDnsName' \
               --output text` 
-            echo "export API_URL=${API_URL}" >> $BASH_ENV
+            echo "export API_URL=${API_URL}:3030" >> $BASH_ENV
       - run:
           name: Deploy frontend objects
           working_directory: frontend/
@@ -231,9 +230,9 @@ jobs:
             for entry in dist/*; do
                 name=`echo $entry | sed 's/.*\///'`  # getting the name of the file or directory
                 if [[ -d  $entry ]]; then  # if it is a directory
-                    aws s3 cp  --recursive "$name" "$s3Dir/$name/"
+                    aws s3 cp  --recursive "$entry" "$s3Dir/$name/"
                 else  # if it is a file
-                    aws s3 cp "$name" "$s3Dir/"
+                    aws s3 cp "$entry" "$s3Dir/"
                 fi
             done
       - destroy-environment:
@@ -241,26 +240,43 @@ jobs:
                     
   smoke-test:
     docker:
-      - image: cimg/base:2020.01
+      - image: cimg/base:stable
     steps:
-      - checkout
       - run:
-          name: Install dependencies
+          name: install awscli
           command: |
-            # your code here
+            sudo apt update
+            sudo apt install python3-pip
+            pip3 install awscli
       - run:
           name: Get backend url
           command: |
-            # your code here
+            export API_URL=`aws ec2 describe-instances \
+              --filters "Name=tag:Name,Values=backend-$CIRCLE_WORKFLOW_ID" \
+              --query 'Reservations[*].Instances[*].PublicDnsName' \
+              --output text` 
+            echo "export API_URL=${API_URL}:3030" >> $BASH_ENV
       - run:
           name: Backend smoke test.
           command: |
-            # your code here
+            if curl -s ${API_URL} | grep "ok"
+            then
+            exit 0
+            else
+            exit 1
+            fi
       - run:
           name: Frontend smoke test.
           command: |
-            # your code here
-      # Here's where you will add some code to rollback on failure  
+            export FRONT_URL=http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website-us-east-2.amazonaws.com/index.html
+            if curl -s ${FRONT_URL} | grep "Welcome"
+            then
+            exit 0
+            else
+            exit 1
+            fi
+      - destroy-environment:
+          stacks-ID: $CIRCLE_WORKFLOW_ID  
 
   cloudfront-update:
     docker:
