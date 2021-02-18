@@ -1,36 +1,36 @@
 ---
 
 - name: install packages
+  become: true
   apt:
     name: [git, build-essential, curl, openssl, libssl-dev]
     state: latest
     update_cache: yes
 
+
 - name: clone repos
-  command: "chdir=/home/ {{ item }}"
+  shell: "chdir=/home/ubuntu/ {{ item }}"
   with_items:
     - git clone https://github.com/omarelsheekh/Udacity-DevOps-Proj3
-    - curl -sL https://deb.nodesource.com/setup_13.x -o nodesource_setup.sh
+    - curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
   
 
 - name: install node
+  become: true
   apt:
     name: nodejs
     state: latest
 
-- name: installing dependencies and run the app
-  command: "chdir=/home/Udacity-DevOps-Proj3/backend/ {{ item }}"
+- name: installing dependencies
+  shell: "chdir=/home/ubuntu/Udacity-DevOps-Proj3/backend/ {{ item }}"
   with_items:
-    - npm install
-    - npm run start
-    - npm install pm2 -g
-    - pm2 start npm --name backend -- start
-  register: runreg
+    - npm install 
+    - npm install pm2
 
-- name: print nodereg
-  debug:
-    var: nodereg.stdout_lines
+# - name: migrate the db
+#   shell: "chdir=/home/ubuntu/Udacity-DevOps-Proj3/backend/ npm run migrations"
 
-- name: print runreg
-  debug:
-    var: runreg.stdout_lines
+- name: run the app
+  shell: "chdir=/home/ubuntu/Udacity-DevOps-Proj3/backend/ pm2 start npm --name backend -- start"
+  # async: 9999999999
+  # poll: 0
