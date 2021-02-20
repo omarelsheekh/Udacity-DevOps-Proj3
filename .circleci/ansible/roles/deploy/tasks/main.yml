@@ -27,8 +27,8 @@
     - npm install 
     - sudo npm install pm2 -g
 
-- name: migrate the db
-  shell: "chdir=/home/ubuntu/Udacity-DevOps-Proj3/backend/ npm run migrations"
+# - name: migrate the db
+#   shell: "chdir=/home/ubuntu/Udacity-DevOps-Proj3/backend/ npm run migrations"
 
 - name: run pm2
   become: false

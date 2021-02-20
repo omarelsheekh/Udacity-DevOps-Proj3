@@ -1,6 +1,24 @@
 version: 2.1
 
+orbs:
+  slack: circleci/slack@4.1
+
 commands:
+  slack-notify:
+    description: notify slack members
+    parameters:
+      team:
+        type: string
+        default: EngTeam
+    steps:
+      - slack/notify:
+          event: fail
+          mentions: '@<< parameters.team >>'
+          template: basic_fail_1
+      - slack/notify:
+          event: pass
+          template: basic_success_1
+
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
@@ -27,10 +45,13 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
+      - slack-notify:
+          team: FrontendDev
       - run:
           name: Build front-end
           working_directory: frontend/
           command: |
+            fnckfjcnkf
             npm install
       - save_cache:
           paths: [frontend/node_modules]
@@ -41,10 +62,13 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
+      - slack-notify:
+          team: BackendDev
       - run:
           name: Back-end build
           working_directory: backend/
           command: |
+            vdfvbfvf
             npm install
       - save_cache:
           paths: [backend/node_modules]
@@ -299,7 +323,7 @@ workflows:
       - scan-frontend:
           requires: [build-frontend]
       - deploy-infrastructure:
-          # requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
           filters:
             branches:
               only: [test-feature-branch, main]
