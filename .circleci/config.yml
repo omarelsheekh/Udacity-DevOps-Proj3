@@ -45,8 +45,6 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
-      - slack-notify:
-          team: FrontendDev
       - run:
           name: Build front-end
           working_directory: frontend/
@@ -56,14 +54,14 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build-{{ .Environment.CIRCLE_WORKFLOW_ID }}
+      - slack-notify:
+          team: FrontendDev
 
   build-backend:
     docker:
       - image: circleci/node:13.8.0
     steps:
       - checkout
-      - slack-notify:
-          team: BackendDev
       - run:
           name: Back-end build
           working_directory: backend/
@@ -73,6 +71,8 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build-{{ .Environment.CIRCLE_WORKFLOW_ID }}
+      - slack-notify:
+          team: BackendDev
 
   test-frontend:
     docker:
