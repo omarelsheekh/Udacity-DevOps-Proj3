@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  slack: circleci/slack@4.1
+  slack: circleci/slack@4.3.0
 
 commands:
   slack-notify:
@@ -15,9 +15,12 @@ commands:
           event: fail
           mentions: '@<< parameters.team >>'
           template: basic_fail_1
+          channel: C01NLLWMML6
       - slack/notify:
           event: pass
+          mentions: '@<< parameters.team >>'
           template: basic_success_1
+          channel: C01NLLWMML6
 
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
