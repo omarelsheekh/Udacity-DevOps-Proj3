@@ -7,6 +7,7 @@
   become: false
   roles:
     - deploy
+    - configure-prometheus-node-exporter
   environment:
     ENVIRONMENT: production
     TYPEORM_CONNECTION: postgres
