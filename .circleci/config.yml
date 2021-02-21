@@ -226,7 +226,7 @@ jobs:
               --filters "Name=tag:Name,Values=backend-$CIRCLE_WORKFLOW_ID" \
               --query 'Reservations[*].Instances[*].PublicDnsName' \
               --output text` 
-            echo "export API_URL=${API_URL}:3030" >> $BASH_ENV
+            echo "export API_URL=http://${API_URL}:3030" >> $BASH_ENV
       - run:
           name: Deploy frontend objects
           working_directory: frontend/
